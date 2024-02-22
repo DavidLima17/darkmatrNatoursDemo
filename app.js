@@ -24,10 +24,12 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use(express.json()); // Middleware to parse the body of the request
 app.use(express.static(`${__dirname}/public`)); // Middleware to serve static files
-app.use((req, res, next) => {
-  console.log('Hello from the middleware 👋');
-  next();
-});
+
+// Custom middleware example
+// app.use((req, res, next) => {
+//   console.log('Hello from the middleware 👋');
+//   next();
+// });
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
