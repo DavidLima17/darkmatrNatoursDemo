@@ -12,6 +12,8 @@
 const express = require('express');
 const morgan = require('morgan');
 
+const AppError = require('./utils/appError');
+const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
@@ -25,12 +27,6 @@ if (process.env.NODE_ENV === 'development') {
 app.use(express.json()); // Middleware to parse the body of the request
 app.use(express.static(`${__dirname}/public`)); // Middleware to serve static files
 
-// Custom middleware example
-// app.use((req, res, next) => {
-//   console.log('Hello from the middleware 👋');
-//   next();
-// });
-
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
@@ -39,6 +35,20 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+app.all('*', (req, res, next) => {
+  // res.status(404).json({
+  //   status: 'fail',
+  //   message: `Can't find ${req.originalUrl} on this server!`,
+  // });
+  // const err = new Error(`Can't find ${req.originalUrl} on this server!`);
+  // err.statusCode = 404;
+  // err.status = 'fail';
+  // next(err);
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+app.use(globalErrorHandler);
 
 // Start server
 module.exports = app;

@@ -8,8 +8,8 @@
   "main": "app.js",
   "scripts": {
     "start:dev": "nodemon server.js",
-    "start:prod": "SET NODE_ENV=production & nodemon server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:prod": "set NODE_ENV=production&& nodemon server.js",
+    "debug": "ndb server.js"
   },
   "author": "David Lima",
   "license": "ISC",
