@@ -10,23 +10,11 @@ const filterObj = (obj, ...allowedFields) => {
   });
   return newObj;
 };
-/**
- * Get all users.
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
-exports.getAllUsers = catchAsync(async (req, res) => {
-  const users = await User.find();
 
-  // Send response
-  res.status(200).json({
-    status: 'success',
-    results: users.length,
-    data: {
-      users,
-    },
-  });
-});
+exports.getMe = (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+};
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Create error if user POSTs password data
@@ -54,45 +42,17 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   });
 });
 
-/**
- * Create a new user.
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
-exports.createUser = (req, res) => {
+exports.createUser = (req, res, next) => {
   res.status(500).json({
     status: 'error',
-    message: 'This route is not yet defined',
+    message: 'This route is not defined! Please use /signup instead',
   });
 };
 
-/**
- * Get a user by ID.
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined',
-  });
-};
+exports.getAllUsers = factory.getAll(User);
 
-/**
- * Update a user by ID.
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
-exports.updateUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined',
-  });
-};
+exports.getUser = factory.getOne(User);
 
-/**
- * Delete a user by ID.
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
+exports.updateUser = factory.updateOne(User);
+
 exports.deleteUser = factory.deleteOne(User);

@@ -1,11 +1,7 @@
 // const fs = require('fs');
 const Tour = require('../models/tourModel');
-const APIFeatures = require('../utils/apiFeatures');
-const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
-
-// const tours = JSON.parse(fs.readFileSync(`${__dirname}../../dev-data/data/tours-simple.json`));
 
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
@@ -14,118 +10,6 @@ exports.aliasTopTours = (req, res, next) => {
   next();
 };
 
-/**
- * Get all tours.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  // Execute the query
-  const features = new APIFeatures(Tour.find(), req.query).filter().sort().limitFields().paginate();
-  const tours = await features.query;
-
-  // Send response
-  res.status(200).json({
-    status: 'success',
-    requestedAt: req.requestTime,
-    results: tours.length,
-    data: {
-      tours,
-    },
-  });
-});
-
-/**
- * Create a new tour.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
-exports.createTour = catchAsync(async (req, res, next) => {
-  const newTour = await Tour.create(req.body);
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      tour: newTour,
-    },
-  });
-
-  // // res.send('Done'); // always need to send back something to complete the request response cycle
-});
-
-/**
- * Get a specific tour by ID.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
-exports.getTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id).populate('reviews');
-
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
-
-/**
- * Update a specific tour by ID.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
-exports.updateTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!tour) {
-    return next(new AppError('No tour found with that ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
-
-/**
- * Delete a specific tour by ID.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
-// exports.deleteTour = catchAsync(async (req, res, next) => {
-//   const tour = await Tour.findByIdAndDelete(req.params.id);
-
-//   if (!tour) {
-//     return next(new AppError('No tour found with that ID', 404));
-//   }
-
-//   res.status(204).json({
-//     status: 'success',
-//     data: null,
-//   });
-// });
-exports.deleteTour = factory.deleteOne(Tour);
-
-/**
- * Get tour statistics.
- *
- * @param {Object} req - The request object.
- * @param {Object} res - The response object.
- */
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([
     { $match: { ratingsAverage: { $gte: 4.5 } } },
@@ -196,3 +80,13 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.getAllTours = factory.getAll(Tour);
+
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
+
+exports.createTour = factory.createOne(Tour);
+
+exports.updateTour = factory.updateOne(Tour);
+
+exports.deleteTour = factory.deleteOne(Tour);

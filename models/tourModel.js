@@ -117,6 +117,11 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
+// Indexes
+tourSchema.index({ price: 1 });
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+
 // Create a virtual property for the duration in weeks
 // This will not be stored in the database so you can't query it
 tourSchema.virtual('durationWeeks').get(function () {
