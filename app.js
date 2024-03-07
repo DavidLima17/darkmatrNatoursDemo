@@ -1,14 +1,4 @@
-/**
- * @fileoverview This file contains the implementation of a Node.js server using Express framework.
- * It defines routes for handling GET and POST requests related to tours.
- * The server listens on a specified port for incoming requests.
- * The data for tours is read from a JSON file and stored in memory.
- * The server responds with JSON data for successful requests.
- *
- * @requires express
- * @requires fs
- */
-
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -22,8 +12,13 @@ const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 
 const app = express();
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public'))); // Middleware to serve static files
 
 // Global Middleware
 // SET SECURITY HTTP HEADERS
@@ -60,7 +55,6 @@ app.use(
 );
 
 // Serving static files
-app.use(express.static(`${__dirname}/public`)); // Middleware to serve static files
 
 // Test middleware
 app.use((req, res, next) => {
@@ -70,19 +64,13 @@ app.use((req, res, next) => {
 });
 
 // Routes
+
+app.use('/', viewRouter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, res, next) => {
-  // res.status(404).json({
-  //   status: 'fail',
-  //   message: `Can't find ${req.originalUrl} on this server!`,
-  // });
-  // const err = new Error(`Can't find ${req.originalUrl} on this server!`);
-  // err.statusCode = 404;
-  // err.status = 'fail';
-  // next(err);
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
